@@ -1,2 +1,2 @@
 # MultiRooming
-This is an implementation of our working paper.
+This is an implementation of numerical study in our working paper.
