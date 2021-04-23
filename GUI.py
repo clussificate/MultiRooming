@@ -223,6 +223,7 @@ class GUI(Frame):
         behavior_dual = utility_compare(H_d_store, H_d_online, L_d_store, L_d_online)
         return behavior_uniform, behavior_dual
 
+
 app = GUI()
 app.master.title("Numerical Experiment")
 # app.master.geometry('1020x800')
