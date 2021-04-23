@@ -6,7 +6,29 @@
 @Desc:
 The backup file is the case that we assume consumers will visit the store if U_store = U_online
 """
+def utility_compare(Hstore, Honline, Lstore, Lonline):
+    if max(Lstore, Lonline) >= 0 and max(Hstore, Honline) >= 0:
+        if Lstore >= Lonline:
+            return "BS"
+        else:
+            return "BO"
 
+    elif max(Lstore, Lonline) >= 0 and max(Hstore, Honline) < 0:
+        if Lstore >= Lonline:
+            return "LS"
+        else:
+            return "LO"
+
+    elif max(Lstore, Lonline) < 0 and max(Hstore, Honline) >= 0:
+        if Hstore >= Honline:
+            return "HS"
+        else:
+            return "HO"
+
+    elif max(Lstore, Lonline) < 0 and max(Hstore, Honline) < 0:
+        return "No sales"
+    else:
+        raise Exception("other cases")
 
 class NumSolver:
     def __init__(self, V=0.8, GAMMA=0.2, P_HAT=0.1, DELTA_h=0.6, DELTA_l=0.2, CR=0.7):

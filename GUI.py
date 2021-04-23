@@ -6,7 +6,7 @@
 @Desc:
 """
 from tkinter import *
-from main import *
+from main import utility_compare, NumSolver
 import matplotlib
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
@@ -50,31 +50,6 @@ def parse(result_dict):
 
     final_string = "c, \t p, \t pon, \t profit_u, \t profit_d, behavior_u, behavior_d \n" + result_string
     return final_string
-
-
-def utility_compare(Hstore, Honline, Lstore, Lonline):
-    if max(Lstore, Lonline) >= 0 and max(Hstore, Honline) >= 0:
-        if Lstore >= Lonline:
-            return "BS"
-        else:
-            return "BO"
-
-    elif max(Lstore, Lonline) >= 0 and max(Hstore, Honline) < 0:
-        if Lstore >= Lonline:
-            return "LS"
-        else:
-            return "LO"
-
-    elif max(Lstore, Lonline) < 0 and max(Hstore, Honline) >= 0:
-        if Hstore >= Honline:
-            return "HS"
-        else:
-            return "HO"
-
-    elif max(Lstore, Lonline) < 0 and max(Hstore, Honline) < 0:
-        return "No sales"
-    else:
-        raise Exception("other cases")
 
 
 class GUI(Frame):
