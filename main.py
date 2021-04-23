@@ -50,19 +50,19 @@ class NumSolver:
         L_u_store, L_u_online = self.get_utility("L", p, poff, c, con)
         if logger:
             if max(L_u_store, L_u_online) >= 0 and max(H_u_store, H_u_online) >= 0:
-                if L_u_store >= L_u_online:
+                if L_u_store > L_u_online:
                     print("sell to both H and L segments offline")
                 else:
                     print("sell to both H and L segments online")
 
             elif max(L_u_store, L_u_online) >= 0 and max(H_u_store, H_u_online) < 0:
-                if L_u_store >= L_u_online:
+                if L_u_store > L_u_online:
                     print("sell to L segment offline")
                 else:
                     print("sell to L segment online")
 
             elif max(L_u_store, L_u_online) < 0 and max(H_u_store, H_u_online) >= 0:
-                if H_u_store >= H_u_online:
+                if H_u_store > H_u_online:
                     print("sell to H segment offline")
                 else:
                     print("sell to H segment online")
@@ -73,12 +73,12 @@ class NumSolver:
                 raise Exception("other cases")
 
         pi_H_online = 1 / 2 * self.GAMMA * (1 / 2 * p + 1 / 2 * (1 - delta) * p - 1 / 2 * delta * self.CR) * (
-            [1 if (H_u_online >= 0 and H_u_online > H_u_store) else 0][0])
-        pi_H_store = 1 / 4 * self.GAMMA * poff * ([1 if (H_u_store >= 0 and H_u_online <= H_u_store) else 0][0])
+            [1 if (H_u_online >= 0 and H_u_online >= H_u_store) else 0][0])
+        pi_H_store = 1 / 4 * self.GAMMA * poff * ([1 if (H_u_store >= 0 and H_u_online < H_u_store) else 0][0])
 
         pi_L_online = 1 / 2 * (1 - self.GAMMA) * (1 / 2 * p + 1 / 2 * (1 - delta) * p - 1 / 2 * delta * self.CR) * (
-            [1 if (L_u_online >= 0 and L_u_online > L_u_store) else 0][0])
-        pi_L_store = 1 / 4 * (1 - self.GAMMA) * poff * ([1 if (L_u_store >= 0 and L_u_online <= L_u_store) else 0][0])
+            [1 if (L_u_online >= 0 and L_u_online >= L_u_store) else 0][0])
+        pi_L_store = 1 / 4 * (1 - self.GAMMA) * poff * ([1 if (L_u_store >= 0 and L_u_online < L_u_store) else 0][0])
 
         expected_profit = pi_H_online + pi_H_store + pi_L_online + pi_L_store
 

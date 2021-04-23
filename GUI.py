@@ -107,7 +107,7 @@ class GUI(Frame):
                             label="Valuation of low type segment V",
                             resolution=0.01, length=250)
         self.ValLow.grid(row=3, column=0)
-        self.ValLow.set(0.8)
+        self.ValLow.set(0.46)
 
         self.PropHigh = Scale(self, orient=HORIZONTAL, from_=0, to=1,
                               label="Proportion of high type segment gamma ",
@@ -130,7 +130,7 @@ class GUI(Frame):
                                    label="The retailer's return cost cr",
                                    resolution=0.01, length=250)
         self.ReturnCostRet.grid(row=6, column=0)
-        self.ReturnCostRet.set(0.7)
+        self.ReturnCostRet.set(0.19)
 
         self.startButton = Button(self, text='Start', command=self.read_params)
         self.startButton.grid(row=7, column=0)
