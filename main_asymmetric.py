@@ -2,8 +2,9 @@
 """
 @Created at 2021/4/27 15:00
 @Author: Kurt
-@file:main.py
+@file:main_asymmetric.py
 @Desc:
+This model consider consumers forgetting return the unsatisfactory product.
 """
 
 
@@ -55,7 +56,7 @@ class NumSolver:
             raise Exception("Consumer Type Error!")
 
         u_store = (theta - poff) / 2 - c
-        u_online = (theta - 2 * p + delta * p) / 2 - con
+        u_online = (theta - p) / 2 - con
         # return np.round(u_store, 3), np.round(u_online, 3)
 
         # quicker round

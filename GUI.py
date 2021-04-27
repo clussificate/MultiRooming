@@ -6,7 +6,7 @@
 @Desc:
 """
 from tkinter import *
-from main import utility_compare, NumSolver
+from main_asymmetric import utility_compare, NumSolver
 import matplotlib
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
