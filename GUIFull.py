@@ -4,16 +4,161 @@
 @Author: Kurt
 @file:GUI.py
 @Desc:
+alpha -> offline only consumers
+beta -> online only consumers
+Considering the offline only consumers, the retailer may charge a high price such that 1-alpha-beta consumers
+conduct showrooming.
 """
 from tkinter import *
-from main import *
+
 import matplotlib
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 import numpy as np
 from tqdm import tqdm
+from main import utility_compare
 
 matplotlib.use('TkAgg')
+
+
+def utility_compare_uniform(Hstore, Honline, Lstore, Lonline):
+    if max(Lstore, Lonline) >= 0 and max(Hstore, Honline) >= 0:
+        if Lstore > Lonline:
+            return "BS"
+        else:
+            return "BO"
+
+    elif max(Lstore, Lonline) >= 0 and max(Hstore, Honline) < 0:
+        if Lstore > Lonline:
+            return "LS"
+        else:
+            return "LO"
+
+    elif max(Lstore, Lonline) < 0 and max(Hstore, Honline) >= 0:
+        if Hstore > Honline:
+            return "HS"
+        else:
+            return "HO"
+
+    elif max(Lstore, Lonline) < 0 and max(Hstore, Honline) < 0:
+        return "No sales"
+    else:
+        raise Exception("other cases")
+
+
+def utility_compare_dual(Hstore, Honline, Hshowrooming, Lstore, Lonline, Lshowrooming):
+    # due to the the comparison between the three cases is independent of theta, we have:
+    if Honline >= max(Hstore, Hshowrooming, 0):  # also implies Honline >= max(Hstore, Hshowrooming)
+        if Lonline >= 0:
+            return "BO"
+        else:
+            return "HO"
+    elif Hstore >= max(Hshowrooming, 0):
+        if Lstore >= 0:
+            return "BS"
+        else:
+            return "HS"
+
+    elif Hshowrooming >= 0:
+        if Lshowrooming >= 0:
+            return "BSR"
+        else:
+            return "HSR"
+    elif max(Lstore, Lshowrooming, Lonline) < 0:
+        return "NoSales"
+    else:
+        raise Exception("Other cases occur!")
+
+
+def find_result(DataDict):
+    flag = False
+    keys = DataDict.keys()
+    cont = dict([(k, []) for k in keys])
+    cont['c'] = []
+
+    for c, profit_u, profit_d, price_u, price_d, \
+        behavior_both, behavior_off, behavior_on in tqdm(zip(np.arange(0, 1, 0.01), DataDict['profit_u'],
+                                                             DataDict['profit_d'], DataDict['price_u'],
+                                                             DataDict['price_d'],
+                                                             DataDict['behavior_both'], DataDict['behavior_off'],
+                                                             DataDict['behavior_on'])):
+
+        if profit_u > profit_d and price_u < price_d[0]:
+            flag = True
+            cont['c'].append(c)
+            cont['profit_u'].append(profit_u)
+            cont['profit_d'].append(profit_d)
+            cont['price_u'].append(price_u)
+            cont['price_d'].append(price_d)
+            cont['behavior_both'].append(behavior_both)
+            cont['behavior_off'].append(behavior_off)
+            cont['behavior_on'].append(behavior_on)
+    return flag, cont
+
+
+class NumSolver:
+    def __init__(self, V=0.8, GAMMA=0.2, P_HAT=0.1, DELTA_h=0.6, DELTA_l=0.2, CR=0.7):
+        self.V = V
+        self.GAMMA = GAMMA
+        self.P_HAT = P_HAT
+        self.DELTA_h = DELTA_h
+        self.DELTA_l = DELTA_l
+        self.CR = CR
+
+    def get_utility(self, TYPE, p, poff, c, con):
+        uty_res = {"store": -1, "online": -1, "showrooming": -1}
+
+        if p >= self.P_HAT:
+            delta = self.DELTA_h
+        else:
+            delta = self.DELTA_l
+
+        if TYPE == "H":
+            theta = 1.00
+        elif TYPE == "L":
+            theta = self.V
+        else:
+            raise Exception("Consumer Type Error!")
+
+        u_store = (theta - poff) / 2 - c
+        u_online = (theta - 2 * p + delta * p) / 2 - con
+        u_showrooming = (theta - p - con) / 2 - c
+
+        u_store = int(u_store * 10000 + 0.5) / 10000
+        u_online = int(u_online * 10000 + 0.5) / 10000
+        u_showrooming = int(u_showrooming * 10000 + 0.5) / 10000
+
+        return u_store, u_online, u_showrooming
+
+    def get_profit(self, p, poff, c, con, logger=False):
+
+        if p >= self.P_HAT:
+            delta = self.DELTA_h
+        else:
+            delta = self.DELTA_l
+
+        H_u_store, H_u_online, H_u_showrooming = self.get_utility("H", p, poff, c, con)
+        L_u_store, L_u_online, L_u_showrooming = self.get_utility("L", p, poff, c, con)
+
+        # Low type
+        pi_H_showrooming = 1 / 4 * self.GAMMA * p * (
+            [1 if (H_u_showrooming >= 0 and H_u_showrooming > max(H_u_store, H_u_online)) else 0][0])
+        pi_H_store = 1 / 4 * self.GAMMA * poff * (
+            [1 if (H_u_store >= max(H_u_showrooming, 0) and H_u_store > H_u_online) else 0][0])
+        pi_H_online = 1 / 4 * self.GAMMA * (p + (1 - delta) * p - delta * self.CR) * (
+            [1 if H_u_online >= max(H_u_showrooming, H_u_store, 0) else 0][0])
+
+        # High type
+        pi_L_showrooming = 1 / 4 * (1 - self.GAMMA) * p * (
+            [1 if (L_u_showrooming >= 0 and L_u_showrooming > max(L_u_store, L_u_online)) else 0][0])
+        pi_L_store = 1 / 4 * (1 - self.GAMMA) * poff * (
+            [1 if (L_u_store >= max(L_u_showrooming, 0) and L_u_store > L_u_online) else 0][0])
+        pi_L_online = 1 / 4 * (1 - self.GAMMA) * (p + (1 - delta) * p - delta * self.CR) * (
+            [1 if L_u_online >= max(L_u_showrooming, L_u_store, 0) else 0][0])
+
+        expected_profit = pi_H_online + pi_H_store + pi_H_showrooming + pi_L_online + pi_L_store + pi_L_showrooming
+
+        return expected_profit
 
 
 def find_result(DataDict):
@@ -58,31 +203,6 @@ def parse(result_dict):
     final_string = "c, \t p, \t pon, \t poff, \t pi_u, \t pi_d, \t behavior_both, \t behavior_off, \t behavior_on \n" \
                    + result_string
     return final_string
-
-
-def utility_compare(Hstore, Honline, Lstore, Lonline):
-    if max(Lstore, Lonline) >= 0 and max(Hstore, Honline) >= 0:
-        if Lstore >= Lonline:
-            return "BS"
-        else:
-            return "BO"
-
-    elif max(Lstore, Lonline) >= 0 and max(Hstore, Honline) < 0:
-        if Lstore >= Lonline:
-            return "LS"
-        else:
-            return "LO"
-
-    elif max(Lstore, Lonline) < 0 and max(Hstore, Honline) >= 0:
-        if Hstore >= Honline:
-            return "HS"
-        else:
-            return "HO"
-
-    elif max(Lstore, Lonline) < 0 and max(Hstore, Honline) < 0:
-        return "No sales"
-    else:
-        raise Exception("other cases")
 
 
 class GUI(Frame):
@@ -179,7 +299,7 @@ class GUI(Frame):
         behavior_tuples_off = []
         behavior_tuples_on = []
 
-        for current_c in np.arange(0, 1, 0.01):
+        for current_c in np.arange(0, 0.5, 0.01):
             optimal_profit_u = 0
             optimal_price_u = 0
             optimal_profit_d = 0
@@ -191,11 +311,16 @@ class GUI(Frame):
                                                                                con=con) \
                                    + ALPHA * self.solver.get_profit(p=p_current, poff=p_current, c=0, con=1) \
                                    + BETA * self.solver.get_profit(p=p_current, poff=p_current, c=1, con=0)
+                # find optimal uniform prices
                 if profit_current_u > optimal_profit_u:
                     optimal_profit_u = profit_current_u
                     optimal_price_u = p_current
 
-                for poff_current in np.arange(p_current + con, 1, 0.005):
+                # poff=pon+con, 1-alpha-beta segment does not conduct showrooming poff=V, 1-alpha-beta segment
+                # conducts showrooming. The offline optimally serve all offline-only consumers poff=1, 1-alpha-beta
+                # segment conducts showrooming. The offline optimally serve high type offline-only consumers
+                OfflinePriceScenarios = [p_current + con, V, 1]
+                for poff_current in OfflinePriceScenarios:
                     profit_current_d = (1 - ALPHA - BETA) * self.solver.get_profit(p=p_current, poff=poff_current,
                                                                                    c=current_c, con=con) \
                                        + ALPHA * self.solver.get_profit(p=p_current, poff=poff_current, c=0, con=1) \
@@ -221,7 +346,8 @@ class GUI(Frame):
             behavior_tuples_off.append(behavior_tuple_off)
             behavior_tuples_on.append(behavior_tuple_on)
 
-        for current_c, price_u, price_d in zip(np.arange(0, 1, 0.01), optimal_prices_u, optimal_prices_d):
+        for current_c, price_u, price_d, profit_u, profit_d in zip(
+                np.arange(0, 1, 0.01), optimal_prices_u, optimal_prices_d, optimal_profits_u, optimal_profits_d):
             behavior_u_both, behavior_d_both = self.analyze_behavior(current_c, con, price_u, price_d[0], price_d[1])
             behavior_u_Off, behavior_d_Off = self.analyze_behavior(0, 1, price_u, price_d[0], price_d[1])
             behavior_u_On, behavior_d_On = self.analyze_behavior(1, 0, price_u, price_d[0], price_d[1])
@@ -229,17 +355,18 @@ class GUI(Frame):
             print("behavior of both-channel u:{}, d:{}".format(behavior_u_both, behavior_d_both))
             print("behavior of offline-only u:{}, d:{}".format(behavior_u_Off, behavior_d_Off))
             print("behavior of online-only u:{}, d:{}".format(behavior_u_On, behavior_d_On))
+            print("profit_u: {:.3f}, profit_d: {:.3f}".format(profit_u, profit_d))
 
         ax1 = self.fig.add_subplot(2, 1, 1)
-        ax1.plot(np.arange(0, 1, 0.01), optimal_profits_u, 'g', label="Uniform")
-        ax1.plot(np.arange(0, 1, 0.01), optimal_profits_d, 'k--', label="Dual")
+        ax1.plot(np.arange(0, 0.5, 0.01), optimal_profits_u, 'g', label="Uniform")
+        ax1.plot(np.arange(0, 0.5, 0.01), optimal_profits_d, 'k--', label="Dual")
         ax1.set_title("profits")
         ax1.legend(prop=dict(size=6), frameon=False)
 
         ax2 = self.fig.add_subplot(2, 1, 2)
-        ax2.plot(np.arange(0, 1, 0.01), optimal_prices_u, 'g', label="Uniform")
-        ax2.plot(np.arange(0, 1, 0.01), [x[0] for x in optimal_prices_d], 'k--', label="Online of Dual")
-        ax2.plot(np.arange(0, 1, 0.01), [x[1] for x in optimal_prices_d], linestyle='-.', label="Offline of Dual")
+        ax2.plot(np.arange(0, 0.5, 0.01), optimal_prices_u, 'g', label="Uniform")
+        ax2.plot(np.arange(0, 0.5, 0.01), [x[0] for x in optimal_prices_d], 'k--', label="Online of Dual")
+        ax2.plot(np.arange(0, 0.5, 0.01), [x[1] for x in optimal_prices_d], linestyle='-.', label="Offline of Dual")
         ax2.set_title("prices")
         ax2.legend(prop=dict(size=6), frameon=False)
 
@@ -286,14 +413,18 @@ class GUI(Frame):
                      'the 2nd element in the behavior tuple is the dual pricing case'.format(parse(result[1])))
 
     def analyze_behavior(self, c, con, uniform_price, dual_online_price, dual_offline_price):
-        H_u_store, H_u_online = self.solver.get_utility("H", uniform_price, uniform_price, c, con)
-        L_u_store, L_u_online = self.solver.get_utility("L", uniform_price, uniform_price, c, con)
+        H_u_store, H_u_online, _ = self.solver.get_utility("H", uniform_price, uniform_price, c, con)
+        L_u_store, L_u_online, _ = self.solver.get_utility("L", uniform_price, uniform_price, c, con)
+        behavior_uniform = utility_compare_uniform(H_u_store, H_u_online, L_u_store, L_u_online)
 
-        H_d_store, H_d_online = self.solver.get_utility("H", dual_online_price, dual_offline_price, c, con)
-        L_d_store, L_d_online = self.solver.get_utility("L", dual_online_price, dual_offline_price, c, con)
+        H_d_store, H_d_online, H_d_showrooming = self.solver.get_utility("H", dual_online_price, dual_offline_price, c,
+                                                                         con)
+        L_d_store, L_d_online, L_d_showrooming = self.solver.get_utility("L", dual_online_price, dual_offline_price, c,
+                                                                         con)
 
-        behavior_uniform = utility_compare(H_u_store, H_u_online, L_u_store, L_u_online)
-        behavior_dual = utility_compare(H_d_store, H_d_online, L_d_store, L_d_online)
+        behavior_dual = utility_compare_dual(H_d_store, H_d_online, H_d_showrooming, L_d_store, L_d_online,
+                                             L_d_showrooming)
+
         return behavior_uniform, behavior_dual
 
 

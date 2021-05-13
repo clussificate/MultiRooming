@@ -53,7 +53,6 @@ class NumSolver:
             theta = self.V
         else:
             raise Exception("Consumer Type Error!")
-
         u_store = (theta - poff) / 2 - c
         u_online = (theta - 2 * p + delta * p) / 2 - con
         # return np.round(u_store, 3), np.round(u_online, 3)
@@ -72,6 +71,7 @@ class NumSolver:
 
         H_u_store, H_u_online = self.get_utility("H", p, poff, c, con)
         L_u_store, L_u_online = self.get_utility("L", p, poff, c, con)
+
         if logger:
             if max(L_u_store, L_u_online) >= 0 and max(H_u_store, H_u_online) >= 0:
                 if L_u_store > L_u_online:
