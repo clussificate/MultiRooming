@@ -63,13 +63,13 @@ class GUI(Frame):
                                     label="High return probability delta_H",
                                     resolution=0.01, length=250)
         self.HighReturnProb.grid(row=0, column=0)
-        self.HighReturnProb.set(0.6)
+        self.HighReturnProb.set(0.89)
 
         self.LowReturnProb = Scale(self, orient=HORIZONTAL, from_=0, to=1,
                                    label="Low return probability delta_L",
                                    resolution=0.01, length=250)
         self.LowReturnProb.grid(row=1, column=0)
-        self.LowReturnProb.set(0.2)
+        self.LowReturnProb.set(0.89)
 
         self.PriceThreshold = Scale(self, orient=HORIZONTAL, from_=0, to=1,
                                     label="Threshold of price p^hat. ",
@@ -81,13 +81,13 @@ class GUI(Frame):
                             label="Valuation of low type segment V",
                             resolution=0.01, length=250)
         self.ValLow.grid(row=3, column=0)
-        self.ValLow.set(0.46)
+        self.ValLow.set(0.52)
 
         self.PropHigh = Scale(self, orient=HORIZONTAL, from_=0, to=1,
                               label="Proportion of high type segment gamma ",
                               resolution=0.01, length=250)
         self.PropHigh.grid(row=4, column=0)
-        self.PropHigh.set(0.2)
+        self.PropHigh.set(0.25)
 
         # self.OfflineCost = Scale(self, orient=HORIZONTAL, from_=0, to=1,
         #                label="Offline cost c",
@@ -98,13 +98,13 @@ class GUI(Frame):
                                 label="Online cost con",
                                 resolution=0.01, length=250)
         self.OnlineCost.grid(row=5, column=0)
-        self.OnlineCost.set(0.16)
+        self.OnlineCost.set(0.14)
 
         self.ReturnCostRet = Scale(self, orient=HORIZONTAL, from_=0, to=1,
                                    label="The retailer's return cost cr",
                                    resolution=0.01, length=250)
         self.ReturnCostRet.grid(row=6, column=0)
-        self.ReturnCostRet.set(0.19)
+        self.ReturnCostRet.set(0.11)
 
         self.startButton = Button(self, text='Start', command=self.read_params)
         self.startButton.grid(row=7, column=0)
