@@ -4,6 +4,7 @@
 @Author: Kurt
 @file:GUI.py
 @Desc:
+Basic discrete model without consideration of price-related return and showrooming-free consumers.
 """
 from tkinter import *
 from main import utility_compare, NumSolver  # main_asymmetric is the forgetting return consumers case.
@@ -11,6 +12,7 @@ import matplotlib
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 import numpy as np
+
 matplotlib.use('TkAgg')
 
 
@@ -224,6 +226,6 @@ class GUI(Frame):
 
 
 app = GUI()
-app.master.title("Numerical Experiment")
+app.master.title("Numerical Experiments")
 # app.master.geometry('1020x800')
 mainloop()
