@@ -96,11 +96,11 @@ class NumSolver:
             else:
                 raise Exception("other cases")
 
-        pi_H_online = 1 / 2 * self.GAMMA * (1 / 2 * p + 1 / 2 * (1 - delta) * p - 1 / 2 * delta * self.CR) * (
+        pi_H_online = 1 / 4 * self.GAMMA * (2 * p - delta * (p + self.CR)) * (
             [1 if (H_u_online >= 0 and H_u_online >= H_u_store) else 0][0])
         pi_H_store = 1 / 4 * self.GAMMA * poff * ([1 if (H_u_store >= 0 and H_u_online < H_u_store) else 0][0])
 
-        pi_L_online = 1 / 2 * (1 - self.GAMMA) * (1 / 2 * p + 1 / 2 * (1 - delta) * p - 1 / 2 * delta * self.CR) * (
+        pi_L_online = 1 / 4 * (1 - self.GAMMA) * (2 * p - delta * (p + self.CR)) * (
             [1 if (L_u_online >= 0 and L_u_online >= L_u_store) else 0][0])
         pi_L_store = 1 / 4 * (1 - self.GAMMA) * poff * ([1 if (L_u_store >= 0 and L_u_online < L_u_store) else 0][0])
 
