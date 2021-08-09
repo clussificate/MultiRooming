@@ -163,8 +163,8 @@ class GUI(Frame):
                 np.arange(0, 1, 0.01), optimal_prices_u, optimal_prices_d, optimal_profits_u, optimal_profits_d):
             behavior_uniform, behavior_dual = self.analyze_behavior(current_c, con, price_u,
                                                                     price_d, price_d + con)
-            print("current c: {:.3f}, price_u: {:.3f}, price_d: {:.3f}".format(current_c, price_u, price_d))
-            print("profit_u: {:.3f}, profit_d: {:.3f}".format(profit_u, profit_d))
+            print("current c: {:.5f}, price_u: {:.5f}, price_d: {:.5f}".format(current_c, price_u, price_d))
+            print("profit_u: {:.5f}, profit_d: {:.5f}".format(profit_u, profit_d))
             print("behavior u:{}, d:{}".format(behavior_uniform, behavior_dual))
 
         ax1 = self.fig.add_subplot(2, 1, 1)
