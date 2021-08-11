@@ -32,6 +32,7 @@ def utility_compare(Hstore, Honline, Lstore, Lonline):
     else:
         raise Exception("other cases")
 
+
 class NumSolver:
     def __init__(self, V=0.8, GAMMA=0.2, P_HAT=0.1, DELTA_h=0.6, DELTA_l=0.2, CR=0.7):
         self.V = V
