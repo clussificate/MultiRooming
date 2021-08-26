@@ -7,8 +7,8 @@
 Basic discrete model without consideration of price-related return and showrooming-free consumers.
 """
 from tkinter import *
-# from main import utility_compare, NumSolver
-from main_asymmetric import utility_compare, NumSolver  # main_asymmetric is the forgetting return consumers case.
+from main import utility_compare, NumSolver
+# from main_asymmetric import utility_compare, NumSolver  # main_asymmetric is the forgetting return consumers case.
 import matplotlib
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
